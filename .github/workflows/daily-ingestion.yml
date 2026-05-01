@@ -1,0 +1,53 @@
+name: Daily Ingestion
+
+on:
+  schedule:
+    # 03:45 UTC == 09:15 IST
+    - cron: "45 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-ingestion
+  cancel-in-progress: false
+
+jobs:
+  run-ingestion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run scheduled ingestion pipeline
+        env:
+          CHROMA_HOST: ${{ secrets.CHROMA_HOST || 'api.trychroma.com' }}
+          CHROMA_PORT: 443
+          CHROMA_API_KEY: ${{ secrets.CHROMA_API_KEY }}
+          CHROMA_TENANT: ${{ secrets.CHROMA_TENANT }}
+          CHROMA_DATABASE: ${{ secrets.CHROMA_DATABASE }}
+          CHROMA_COLLECTION_NAME: ${{ secrets.CHROMA_COLLECTION_NAME || 'mutual_fund_faqs' }}
+        run: |
+          PYTHONPATH=src python -m ingestion.run_ingestion
+
+      - name: Upload ingestion reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-artifacts
+          path: |
+            data/reports
+            data/parsed
+            data/normalized
+            data/chunked
