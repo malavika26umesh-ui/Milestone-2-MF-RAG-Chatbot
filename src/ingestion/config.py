@@ -38,11 +38,11 @@ CHUNK_OVERLAP_TOKENS = int(os.getenv("CHUNK_OVERLAP_TOKENS", "50"))
 # Phase 4.3 vector index configuration
 INGEST_CHROMA_DIR = Path(os.getenv("INGEST_CHROMA_DIR", str(DATA_DIR / "chroma")))
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "mutual_fund_faqs")
-CHROMA_HOST = os.getenv("CHROMA_HOST", None)
-CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
-CHROMA_API_KEY = os.getenv("CHROMA_API_KEY", None)
-CHROMA_TENANT = os.getenv("CHROMA_TENANT", "default404")
-CHROMA_DATABASE = os.getenv("CHROMA_DATABASE", "default404")
+CHROMA_HOST = os.getenv("CHROMA_HOST") or None
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", "443"))
+CHROMA_API_KEY = os.getenv("CHROMA_API_KEY") or None
+CHROMA_TENANT = os.getenv("CHROMA_TENANT") or "default"
+CHROMA_DATABASE = os.getenv("CHROMA_DATABASE") or "default"
 
 # Phase 4.4 BM25 and Doc Store configuration
 BM25_INDEX_DIR = DATA_DIR / "bm25"
