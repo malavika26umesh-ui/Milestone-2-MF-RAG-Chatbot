@@ -38,6 +38,11 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///data/threads.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+# Ensure local data directory exists if falling back to SQLite
+if DATABASE_URL.startswith("sqlite:///") and "memory" not in DATABASE_URL:
+    db_path = DATABASE_URL.replace("sqlite:///", "")
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
