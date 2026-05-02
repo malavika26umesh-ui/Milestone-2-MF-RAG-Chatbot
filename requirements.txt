@@ -8,6 +8,7 @@ chromadb
 rank_bm25
 fastapi
 uvicorn
+gunicorn
 python-multipart
 sqlalchemy
 psycopg2-binary
