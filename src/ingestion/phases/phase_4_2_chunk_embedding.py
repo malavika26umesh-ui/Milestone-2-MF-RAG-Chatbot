@@ -29,9 +29,9 @@ def _load_tokenizer():
 
 def _load_embedder():
     try:
-        from sentence_transformers import SentenceTransformer
+        from fastembed import TextEmbedding
 
-        return SentenceTransformer(EMBEDDING_MODEL_ID), "sentence_transformers"
+        return TextEmbedding(model_name=EMBEDDING_MODEL_ID), "fastembed"
     except Exception:
         return None, "fallback_hash_embedding"
 
@@ -233,14 +233,9 @@ def run_phase_4_2_chunk_embedding(phase_4_1_manifest: dict, run_id: str) -> dict
 
     chunk_texts = [row["chunk_text"] for row in deduped_rows]
     if embedder is not None:
-        vectors = embedder.encode(
-            chunk_texts,
-            batch_size=EMBED_BATCH_SIZE,
-            normalize_embeddings=True,
-            convert_to_numpy=True,
-            show_progress_bar=False,
-        )
-        vector_rows = [vectors[i].tolist() for i in range(len(deduped_rows))]
+        # Use fastembed to encode chunks
+        vectors = list(embedder.embed(chunk_texts))
+        vector_rows = [v.tolist() for v in vectors]
     else:
         vector_rows = [_fallback_vector(text, EMBEDDING_DIMENSION) for text in chunk_texts]
 

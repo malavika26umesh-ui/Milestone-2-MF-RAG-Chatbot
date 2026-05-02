@@ -1,7 +1,7 @@
 beautifulsoup4
 PyYAML
 requests
-sentence-transformers
+fastembed
 transformers
 groq
 chromadb

@@ -5,7 +5,7 @@ from typing import Any
 
 import chromadb
 from chromadb import CloudClient
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 from ingestion.config import (
     CHROMA_API_KEY,
@@ -27,9 +27,9 @@ class MFRetriever:
         """
         self.run_id = run_id or self._find_latest_run_id()
         
-        # 1. Initialize BGE Model
+        # 1. Initialize FastEmbed Model
         print(f"Loading embedding model: {EMBEDDING_MODEL_ID}...")
-        self.model = SentenceTransformer(EMBEDDING_MODEL_ID)
+        self.model = TextEmbedding(model_name=EMBEDDING_MODEL_ID)
         
         # 2. Initialize Chroma Cloud Client
         print(f"Connecting to Chroma Cloud (Tenant: {CHROMA_TENANT}, DB: {CHROMA_DATABASE})")
@@ -79,9 +79,10 @@ class MFRetriever:
         if scheme_filter:
             print(f"Detected scheme filter: {scheme_filter}")
         
-        # 1. Dense Search
+        # Query embedding using fastembed (returns a generator, so we take the first item)
         query_text = f"Represent this sentence: {normalized_q}"
-        query_embedding = self.model.encode(query_text, normalize_embeddings=True).tolist()
+        query_embedding = list(self.model.embed([query_text]))[0].tolist()
+        
         
         where_clause = {"scheme_id": scheme_filter} if scheme_filter else None
         
