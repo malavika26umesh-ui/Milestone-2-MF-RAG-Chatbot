@@ -38,7 +38,7 @@ class MFRetriever:
             database=CHROMA_DATABASE,
             api_key=CHROMA_API_KEY
         )
-        self.collection = self.chroma_client.get_collection(name=CHROMA_COLLECTION_NAME)
+        self.collection = self.chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
         
         # 3. Load BM25 Index & Mapping
         self.bm25 = None
