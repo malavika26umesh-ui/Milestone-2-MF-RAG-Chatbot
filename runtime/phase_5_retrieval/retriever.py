@@ -1,3 +1,8 @@
+import os
+import sys
+# Ensure 'src' is in path
+sys.path.append(os.path.join(os.getcwd(), "src"))
+
 import json
 import pickle
 from pathlib import Path

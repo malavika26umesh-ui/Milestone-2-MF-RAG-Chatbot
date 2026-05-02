@@ -1,4 +1,8 @@
 import os
+import sys
+# Ensure 'src' is in path so 'ingestion' can be imported
+sys.path.append(os.path.join(os.getcwd(), "src"))
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
