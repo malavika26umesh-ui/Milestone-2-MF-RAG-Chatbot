@@ -82,6 +82,10 @@ def main() -> int:
     phase_4_4_manifest = run_phase_4_4_indexing(
         phase_4_2_manifest=phase_4_2_manifest, run_id=run_stamp
     )
+    
+    print("Phase 4.5: Syncing to Production Database...")
+    from ingestion.phases.phase_4_5_db_sync import run_phase_4_5_db_sync
+    phase_4_5_manifest = run_phase_4_5_db_sync(changed_items=changed_items, run_id=run_stamp)
 
     failed_count = sum(1 for r in raw_results if r.get("error") is not None)
     fetched_count = len(raw_results) - failed_count
@@ -98,11 +102,12 @@ def main() -> int:
     report["phase_4_2"] = phase_4_2_manifest
     report["phase_4_3"] = phase_4_3_manifest
     report["phase_4_4"] = phase_4_4_manifest
+    report["phase_4_5"] = phase_4_5_manifest
 
     report_path = REPORTS_DIR / f"run-report-{run_stamp}.json"
     write_json(report_path, report)
     print(f"Ingestion complete. Report: {report_path}")
-    print(f"Status: {report['status']} | Changed URLs: {report['changed_count']}")
+    print(f"Status: {report['status']} | Changed URLs: {report['changed_count']} | Synced to DB: {phase_4_5_manifest.get('synced_count', 0)}")
 
     return 1 if report["status"] == "failed" else 0
 

@@ -9,3 +9,6 @@ rank_bm25
 fastapi
 uvicorn
 python-multipart
+sqlalchemy
+psycopg2-binary
+python-dotenv
