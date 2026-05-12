@@ -31,7 +31,27 @@ export default function Home() {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!activeThreadId) return;
+    let currentThreadId = activeThreadId;
+
+    // Auto-create thread if none is active
+    if (!currentThreadId) {
+      setIsLoading(true);
+      try {
+        const thread = await api.createThread();
+        setThreads(prev => [thread, ...prev]);
+        setActiveThreadId(thread.id);
+        currentThreadId = thread.id;
+      } catch (e) {
+        console.error('Failed to auto-create thread', e);
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: 'Error: Failed to initialize a new conversation. Please check your backend connection.', 
+          timestamp: '' 
+        }]);
+        setIsLoading(false);
+        return;
+      }
+    }
     
     // Add user message locally
     const userMsg: Message = { role: 'user', content, timestamp: '' };
@@ -39,7 +59,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const assistantMsg = await api.sendMessage(activeThreadId, content);
+      const assistantMsg = await api.sendMessage(currentThreadId, content);
       setMessages(prev => [...prev, assistantMsg]);
     } catch {
       setMessages(prev => [...prev, { 
@@ -57,7 +77,13 @@ export default function Home() {
     async function startFetching() {
       try {
         const data = await api.listThreads();
-        if (!ignore) setThreads(data);
+        if (!ignore) {
+          setThreads(data);
+          // Auto-select most recent thread
+          if (data.length > 0 && !activeThreadId) {
+            setActiveThreadId(data[0].id);
+          }
+        }
       } catch (e) {
         console.error('Failed to load threads', e);
       }
@@ -149,7 +175,7 @@ export default function Home() {
           )}
         </div>
 
-        <ChatInput onSend={handleSendMessage} isLoading={isLoading} disabled={!activeThreadId} />
+        <ChatInput onSend={handleSendMessage} isLoading={isLoading} disabled={false} />
       </main>
     </div>
   );
