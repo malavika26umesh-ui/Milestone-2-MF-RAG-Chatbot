@@ -14,35 +14,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadThreads();
-  }, []);
-
-  useEffect(() => {
-    if (activeThreadId) {
-      loadMessages(activeThreadId);
-    }
-  }, [activeThreadId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const loadThreads = async () => {
-    try {
-      const data = await api.listThreads();
-      setThreads(data);
-    } catch (e) {
-      console.error('Failed to load threads', e);
-    }
-  };
-
-  const loadMessages = async (id: string) => {
-    try {
-      const data = await api.getMessages(id);
-      setMessages(data);
-    } catch (e) {
-      console.error('Failed to load messages', e);
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
 
@@ -67,7 +41,7 @@ export default function Home() {
     try {
       const assistantMsg = await api.sendMessage(activeThreadId, content);
       setMessages(prev => [...prev, assistantMsg]);
-    } catch (e) {
+    } catch {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'Error: Failed to get response from server.', 
@@ -78,11 +52,38 @@ export default function Home() {
     }
   };
 
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  useEffect(() => {
+    let ignore = false;
+    async function startFetching() {
+      try {
+        const data = await api.listThreads();
+        if (!ignore) setThreads(data);
+      } catch (e) {
+        console.error('Failed to load threads', e);
+      }
     }
-  };
+    startFetching();
+    return () => { ignore = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    let ignore = false;
+    async function startFetching() {
+      try {
+        const data = await api.getMessages(activeThreadId as string);
+        if (!ignore) setMessages(data);
+      } catch (e) {
+        console.error('Failed to load messages', e);
+      }
+    }
+    startFetching();
+    return () => { ignore = true; };
+  }, [activeThreadId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
