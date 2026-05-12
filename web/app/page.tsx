@@ -1,4 +1,5 @@
 'use client';
+// UX Optimized Version: Auto-thread selection and manual thread creation enabled.
 
 import { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
