@@ -1,0 +1,14 @@
+{
+  "name": "mf-rag-chatbot-root",
+  "private": true,
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=web",
+    "install": "npm install --workspace=web"
+  },
+  "dependencies": {
+    "next": "16.2.4"
+  }
+}
